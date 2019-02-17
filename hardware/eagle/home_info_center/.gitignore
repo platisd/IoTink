@@ -1,0 +1,8 @@
+# Ignore everything
+*
+# Except the following:
+!.gitignore
+!home_info_center_esp12f.brd
+!home_info_center_esp12f.sch
+!README.md
+!LICENSE
