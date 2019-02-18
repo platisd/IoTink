@@ -75,9 +75,26 @@ const int kWeatherPadding = 1;
 const unsigned long kRequestTimeout = 15000UL; // In milliseconds
 const unsigned long kNormalDeepSleepDuration = 60e6; // In microseconds
 const unsigned long kErrorDeepSleepDuration = kNormalDeepSleepDuration / 4; // In microseconds
+const unsigned long kLongDeepSleepDuration = kNormalDeepSleepDuration * 60; // In microseconds
 
 GxIO_Class io(SPI, /*CS=D8*/ 4, /*DC=D6*/ 12, /*RST=D4*/ 2);
 GxEPD_Class display(io, /*RST=D4*/ 2, /*BUSY=D2*/ 5);
+
+unsigned long timeOfTheDayToSleepInterval(const char* timeOfDay) {
+  // Verify we actually received an input in the format HH:mm
+  if (timeOfDay == nullptr || timeOfDay[0] == '\0' || timeOfDay[1] == '\0') {
+    return kNormalDeepSleepDuration;
+  }
+  const char timeBuffer[] = {timeOfDay[0], timeOfDay[1]};
+  const auto currentHour = atoi(timeBuffer);
+
+  // If it's night or too early in the morning, there's no need for updates
+  if (currentHour < 6) {
+    return kLongDeepSleepDuration;
+  }
+
+  return kNormalDeepSleepDuration;
+}
 
 void drawError(const char* errorMessage) {
   display.init();
@@ -273,10 +290,13 @@ void setup()
        shortRangePredictions[0].as<const char*>(), shortRangePredictions[1].as<const char*>(), shortRangePredictions[2].as<int>(),
        midRangePredictions[0].as<const char*>(), midRangePredictions[1].as<const char*>(), midRangePredictions[2].as<int>(),
        longRangePredictions[0].as<const char*>(), longRangePredictions[1].as<const char*>(), longRangePredictions[2].as<int>());
+
+  Serial.println("Going to deep sleep");
+  ESP.deepSleep(timeOfTheDayToSleepInterval(root["time"].as<const char*>()));
 }
 
 void loop()
 {
-  Serial.println("Going to deep sleep");
-  ESP.deepSleep(kNormalDeepSleepDuration);
+  // We should never be here, but just in case this ever happens, go to sleep
+  ESP.deepSleep(kErrorDeepSleepDuration);
 }
