@@ -44,6 +44,7 @@ supplying just enough voltage for the microcontroller to operate seamlessly.
 ### Software dependencies
 * [GxEPD](https://github.com/ZinggJM/GxEPD/) library for controlling the e-paper display
 * [Adafruit GFX](https://github.com/adafruit/Adafruit-GFX-Library) library for the graphics
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) library for parsing JSON
 
 ## Media
 * [Background story](https://platis.solutions/blog/2019/02/18/iotink-your-portable-e-paper-dashboard/)
