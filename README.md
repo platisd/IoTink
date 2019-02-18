@@ -29,7 +29,7 @@ enables us to program the chip when necessary via UART. 2+2 AA batteries are
 supplying just enough voltage for the microcontroller to operate seamlessly.
 
 ### Components
-* IoTink PCB rev.0
+* [IoTink PCB rev.0](https://www.pcbway.com/project/shareproject/IoTink__Your_portable_e_paper_dashboard.html)
 * [4.2" e-paper module by Waveshare](https://www.waveshare.com/wiki/4.2inch_e-Paper_Module)
 * ESP12F
 * [4x AA battery holders](https://www.electrokit.com/produkt/batterihallare-1xaa-pcb/) [Dimensions](https://i.imgur.com/DCF7JLv.jpg)
