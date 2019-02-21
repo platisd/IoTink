@@ -89,23 +89,11 @@ unsigned long timeOfTheDayToSleepInterval(const char* timeOfDay) {
   const auto currentHour = atoi(timeBuffer);
 
   // If it's night or too early in the morning, there's no need for updates
-  if (currentHour < 6) {
+  if (currentHour > 22 || currentHour < 7) {
     return kLongDeepSleepDuration;
   }
 
   return kNormalDeepSleepDuration;
-}
-
-void drawError(const char* errorMessage) {
-  display.init();
-  pinMode(12, OUTPUT); // Pin 12 on ESP8266 is initialized as input by SPI so we must set it as OUTPUT again
-  display.fillScreen(GxEPD_WHITE);
-  display.setFont(&FreeMonoBold12pt7b);
-  display.setTextColor(GxEPD_BLACK);
-  display.setCursor(0, 0);
-  display.println();
-  display.println(errorMessage);
-  display.update();
 }
 
 void draw(const char* updateTime,
@@ -236,42 +224,31 @@ bool connectToWifi() {
 
   // Try to connect to the internet
   WiFi.begin(kInternetSSID, kWifiPassword);
-  auto attemptsLeft = 100;
+  auto attemptsLeft = 1000;
   while ((WiFi.status() != WL_CONNECTED) && (--attemptsLeft > 0)) {
-    Serial.print('.');
-    delay(100); // Wait a bit before retrying
+    delay(10); // Wait a bit before retrying
   }
-  Serial.println();
   return attemptsLeft > 0;
 }
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("\nConnecting to wifi");
   if (!connectToWifi()) {
-    Serial.println("Failed to connect to wifi");
     ESP.deepSleep(kErrorDeepSleepDuration);
-    //drawError("Failed to connect to Wifi");
     return;
   }
-  Serial.println("Connection success");
 
-  Serial.println("GETting data");
   HTTPClient http;
   http.setTimeout(kRequestTimeout);
   http.begin(kServerUrl);
   auto httpCode = http.GET();
 
   if (httpCode < 0 || httpCode != HTTP_CODE_OK) {
-    Serial.printf("[%s] GET failed with code '%s'\r\n", __FUNCTION__, http.errorToString(httpCode).c_str());
     http.end();
     ESP.deepSleep(kErrorDeepSleepDuration);
-    //drawError("Failed to connect to server");
     return;
   }
 
-  Serial.println("GET succeeded, parsing JSON");
   DynamicJsonDocument doc(600);
   deserializeJson(doc, http.getStream());
   JsonObject root = doc.as<JsonObject>();
@@ -282,7 +259,6 @@ void setup()
   JsonArray midRangePredictions = predictions[2];
   JsonArray longRangePredictions = predictions[3];
 
-  Serial.println("Json parsed. Updating the screen.");
   draw(root["time"].as<const char*>(),
        root["depsA"][0].as<const char*>(), root["depsA"][1].as<const char*>(),
        root["depsB"][0].as<const char*>(), root["depsB"][1].as<const char*>(),
@@ -291,7 +267,6 @@ void setup()
        midRangePredictions[0].as<const char*>(), midRangePredictions[1].as<const char*>(), midRangePredictions[2].as<int>(),
        longRangePredictions[0].as<const char*>(), longRangePredictions[1].as<const char*>(), longRangePredictions[2].as<int>());
 
-  Serial.println("Going to deep sleep");
   ESP.deepSleep(timeOfTheDayToSleepInterval(root["time"].as<const char*>()));
 }
 
