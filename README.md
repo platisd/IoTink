@@ -1,7 +1,7 @@
 # IoTink
 Your portable & connected, e-paper dashboard
 
-![IoTink](https://platis.solutions/blog/wp-content/uploads/2019/02/iotink_feat.jpg)
+![IoTink](https://i.imgur.com/P8C95Wt.jpg)
 
 ## What?
 **IoT + E-Ink = IoTink**
